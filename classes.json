@@ -1,0 +1,17 @@
+{
+  "00" : "bedroom",
+  "01" : "house",
+  "02" : "chimney",
+  "03" : "kitchen",
+  "04" : "living room",
+  "05" : "beach",
+  "06" : "forest",
+  "07" : "road",
+  "08" : "building",
+  "09" : "jokul",
+  "10" : "meadow",
+  "11" : "street",
+  "12" : "skyscraper",
+  "13" : "computer room",
+  "14" : "supermarket"
+}
