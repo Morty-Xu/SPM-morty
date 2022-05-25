@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 from utils import test_postfix_dir
 import time
+import json
 
 
 class Scene15:
@@ -136,16 +137,20 @@ class Scene15:
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
+    with open('config.json', 'r') as f:
+        config = json.load(f)
 
     startime = time.perf_counter()
-    root = r".\data\15-Scene"
-    dataset = Scene15(root)
+
+    path = config['data_loader']['args']['data_dir']
+    dataset = Scene15(path)
     X, y, X2, y2 = dataset.xy(using_clss=5)
     print(X.shape)
     print(y.shape)
     print(X2.shape)
     print(y2.shape)
     print(y)
+
     endtime = time.perf_counter()
     print("Using {} s".format(endtime - startime))
 
