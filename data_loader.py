@@ -135,24 +135,24 @@ class Scene15:
         return labels
 
 
-if __name__ == "__main__":
-    import matplotlib.pyplot as plt
-    with open('config.json', 'r') as f:
-        config = json.load(f)
-
-    startime = time.perf_counter()
-
-    path = config['data_loader']['args']['data_dir']
-    dataset = Scene15(path)
-    X, y, X2, y2 = dataset.xy(using_clss=5)
-    print(X.shape)
-    print(y.shape)
-    print(X2.shape)
-    print(y2.shape)
-    print(y)
-
-    endtime = time.perf_counter()
-    print("Using {} s".format(endtime - startime))
-
-    plt.imshow(X[0])
-    plt.show()
+# if __name__ == "__main__":
+#     import matplotlib.pyplot as plt
+#     with open('config.json', 'r') as f:
+#         config = json.load(f)
+#
+#     startime = time.perf_counter()
+#
+#     path = config['data_loader']['args']['data_dir']
+#     dataset = Scene15(path)
+#     X, y, X2, y2 = dataset.xy(using_clss=5)
+#     print(X.shape)
+#     print(y.shape)
+#     print(X2.shape)
+#     print(y2.shape)
+#     print(y)
+#
+#     endtime = time.perf_counter()
+#     print("Using {} s".format(endtime - startime, '.2f'))
+#
+#     plt.imshow(X[0])
+#     plt.show()

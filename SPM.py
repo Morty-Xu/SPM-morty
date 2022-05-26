@@ -6,12 +6,13 @@ import numpy as np
 from tqdm import tqdm
 from collections import Counter
 import cv2
+from sklearn.metrics import classification_report
 
 
 class SPM:
 
     def __init__(self, M = 200, L = 2, cluster_batch = 1000, do_train_clusters = True, do_train_classifier = True,
-        max_num_sample_train_cluster = 20000, save_root = "save", use_matrix_in_kernel = False, save_sift_feature = True):
+        max_num_sample_train_cluster = float('inf'), save_root = "save", use_matrix_in_kernel = False, save_sift_feature = True):
         self.save_root = test_postfix_dir(save_root)
         test_and_make_dir(self.save_root)
 
@@ -33,7 +34,9 @@ class SPM:
         self.classifier = SVC(kernel=self.spatial_pyramid_matching_kernel)
         self.MAX_NUM_SAMPLE_TRAIN_CLUSTER  = max_num_sample_train_cluster # maximum number of training samples in training KMeans
 
-    def _set_feature_hw(self, images):
+        self.num_feature_h, self.num_feature_w = None, None
+
+    def set_feature_hw(self, images):
         h, w = images.shape[1:]
         patch_size = (16, 16)
         step_size = 8
@@ -65,6 +68,35 @@ class SPM:
 
         return features
 
+    def train_clusters(self, features):
+        """ use random subset of patch features to train KMeans as dictionary.
+        """
+        # sample from features
+        num_samples, num_points = features.shape[:2]
+        size_train_set = min(num_samples * num_points, self.MAX_NUM_SAMPLE_TRAIN_CLUSTER)
+        indices = np.random.choice(num_samples * num_points, size_train_set)
+
+        # todo: ref might consume large additional memory
+        trainset = features.reshape(num_points * num_samples, -1)[indices, :]
+
+        # train and predict
+        # self.clusters.fit(trainset)
+        print("Training MiniBatch KMeans")
+        for i in tqdm(range(size_train_set // self.clusters_batch + 1)):
+            start_idx = self.clusters_batch * i
+            end_idx = min(self.clusters_batch * (i + 1), size_train_set)
+            if end_idx - start_idx == 0:
+                break
+            batch = trainset[start_idx:end_idx, :]
+            self.clusters.partial_fit(batch)
+
+    def train_classifier(self, X_train, y_train):
+        self.classifier.fit(X_train, y_train)
+        y_predict = self.classifier.predict(X_train)
+
+        report = classification_report(y_train, y_predict)
+        print("Classifier Training Report: \n {}".format(report))
+
     def spatial_pyramid_matching_kernel(self, x, y):
         """ spatial pyramid matching kernel function of svm,
             calculate the matching score of two vector
@@ -93,7 +125,6 @@ class SPM:
 
             # cells in each level
             for cell in range(num_level_cells):
-
                 idx_y = cell // num_segments
                 idx_x = cell % num_segments
 
@@ -139,6 +170,25 @@ class SPM:
 
         return t
 
+    def toBOF(self, features):
+        """ convert lower feature to bags of feature
+        """
+        num_samples, num_points = features.shape[:2]
+        vocab = self.clusters.predict(features.reshape(num_samples * num_points, -1))
+        return vocab.reshape(num_samples, num_points, )
+
+    def save_feature(self, feature):
+        np.save(self.save_root + "feature_" + currentTime() + ".npy", feature)
+
+    def load_feature(self, filename):
+        return np.load(filename)
+
     def save_model(self):
         joblib.dump(self.clusters, self.save_root + "clusters_" + currentTime() + ".pt")
         joblib.dump(self.classifier, self.save_root + "classifier_" + currentTime() + ".pt")
+
+    def load_model(self, cluster_file = None, classifier_file= None):
+        if cluster_file:
+            self.clusters =  joblib.load(cluster_file)
+        if classifier_file:
+            self.classifier = joblib.load(classifier_file)
