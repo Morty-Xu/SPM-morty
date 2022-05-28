@@ -38,6 +38,8 @@ def test(model, images, labels, batch_size = 100, precompute_feature = None):
     predict = inference(model=model, images=images,
                 batch_size=batch_size, precompute_feature= precompute_feature)
     report = classification_report(labels, predict, output_dict = True)
+    # 输出混淆矩阵
+    model.save_confusion_matrix(labels, predict)
     print(report)
     return report
 

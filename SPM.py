@@ -1,12 +1,12 @@
-from utils import test_postfix_dir, test_and_make_dir, currentTime, json_dump
-from sklearn.cluster import KMeans, MiniBatchKMeans
+from utils import test_postfix_dir, test_and_make_dir, currentTime
+from sklearn.cluster import MiniBatchKMeans
 import joblib
 from sklearn.svm import SVC
 import numpy as np
 from tqdm import tqdm
 from collections import Counter
 import cv2
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, confusion_matrix
 
 
 class SPM:
@@ -180,6 +180,10 @@ class SPM:
     def save_feature(self, feature):
         np.save(self.save_root + "feature_" + currentTime() + ".npy", feature)
 
+    def save_confusion_matrix(self, labels, predict):
+        con_matrix = confusion_matrix(labels, predict)
+        np.save(self.save_root + "confusion_matrix_" + currentTime() + ".npy", con_matrix)
+
     def load_feature(self, filename):
         return np.load(filename)
 
@@ -192,3 +196,6 @@ class SPM:
             self.clusters =  joblib.load(cluster_file)
         if classifier_file:
             self.classifier = joblib.load(classifier_file)
+
+    def predict_clss(self, X):
+        return self.classifier.predict(X)

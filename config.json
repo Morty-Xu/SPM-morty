@@ -24,11 +24,12 @@
     },
 
     "trainer" : {
-        "using_clss" : 3,
+        "using_clss" : 15,
         "num_clss_train_image" : 150,
         "max_num_sample_train_cluster" : 20000,
         "M" : 200,
         "L" : 2,
-        "save_dir" : "save"
+        "save_dir" : "save",
+        "use_matrix_in_kernel" : false
     }
 }
